@@ -5,7 +5,7 @@ using Psicle.XMLClasses;
 
 namespace Decryption
 {
-    static class DecryptPSI
+    static class DecryptPsi
     {
         private static void Main()
         {
@@ -15,8 +15,30 @@ namespace Decryption
 
             switch (command)
             {
-                case "*.psi": Console.WriteLine("*.psi is Recognised "); break;
-                case "*.xml": Console.WriteLine("*.xml is Recognised "); break;
+                case "*.psi":
+                    Console.WriteLine("*.psi is Recognised ");
+                    
+
+                    foreach (string file in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.psi"))
+                    {
+                       var newfile = file.Replace(".psi", "");
+                        Decrypt(newfile);
+                    }
+
+
+                    break;
+                case "*.xml": Console.WriteLine("*.xml is Recognised ");
+
+                    
+
+                    foreach (string file in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.xml"))
+                    {
+                        var newfile = file.Replace(".xml", "");
+                       Encryption(newfile);
+                    }
+
+                    
+                    break;
                 default:
                      
                     var state = FileCheck(command);
@@ -31,7 +53,7 @@ namespace Decryption
                             if (command != null)
                             {
                                 var input = command.Split(' ');
-                                Encrypt(input[0]);
+                                Encryption(input[0]);
                             }
                         }
                         else
@@ -39,39 +61,31 @@ namespace Decryption
                             Decrypt(command);
                         }
                     }
-                    
-                   
                     break;
 
             }
-
             
-           
-         
            Console.Read();
 
         }
 
-        private static void ConversionSuccessful(string Outformat)=>Console.WriteLine("\nConversion Successful you will find the required " + Outformat + " file in the current Directory");
+        private static void ConversionSuccessful(string Type ,string Outformat )=>Console.WriteLine("\n"+ Type +" successful you will find the required " + Outformat + " file in the current Directory");
         private static void InvalidInput() => Console.WriteLine("\nEither the file referenced does not exist or no file name was provided.");
         private static void Decrypt(string File)
         {
             // Importing Building Block
             var bb = XMLUtils.LoadXML<PsicleBuildingBlock>(File);
             // Printing of Building Block 
-            XMLUtils.SaveXML(File + ".XML", bb);
-            ConversionSuccessful("XML");
+            XMLUtils.SaveXML(File + ".xml", bb);
+            ConversionSuccessful("Decryption","XML");
             
         }
 
-        private static void Encrypt(string File)
+        private static void Encryption(string File)
         {
-            // Importing Building Block
-            var bb = XMLUtils.LoadXML<PsicleBuildingBlock>(File);
-            // Printing of Building Block 
-            XMLUtils.SaveXML(File + ".PSI", bb);
-
-          ConversionSuccessful("PSI");
+                      // Printing of Building Block 
+            AesEncryption.EncryptFile(File + ".xml", File + ".psi");
+            ConversionSuccessful("Encryption","PSI");
 
         }
 
@@ -92,14 +106,15 @@ namespace Decryption
             {
                 state[0] = 0;
             }
-
             else
             {
                 state[0] = 1;
             }
 
-            if (state[0] != 1) return state;
-            if (File.Exists(results[0] + ".psi"))
+            
+            if (state[0] == 1 && (File.Exists(inputarr[0] + ".psi")))
+                state[1] = 0;
+            else if (state[0] == 0 && (File.Exists(inputarr[0] + ".xml")))
             {
                 state[1] = 0;
             }
